@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="src/quadTransform.cbp" />
+		<Project filename="src/windows.cbp" />
+		<Project filename="src/mouseKeyboard.cbp" />
+		<Project filename="src/triangleAnim.cbp" />
+		<Project filename="src/xadrez.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>

@@ -1,0 +1,22 @@
+# depslib dependency file v1.0
+1534289487 source:c:\users\voitt\onedrive\documents\programs\c++\computação gráfica\cg\src\quad.cpp
+	<GL/glut.h>
+	<stdio.h>
+	<stdlib.h>
+
+1368290960 c:\users\voitt\onedrive\documents\programs\c++\computação gráfica\cg\shared\windows\include\gl\glut.h
+	"freeglut_std.h"
+
+1368290960 c:\users\voitt\onedrive\documents\programs\c++\computação gráfica\cg\shared\windows\include\gl\freeglut_std.h
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
+
+1534291460 source:c:\users\voitt\onedrive\documents\programs\c++\computação gráfica\cg\src\xadrez.cpp
+	<GL/glut.h>
+	<stdio.h>
+	<stdlib.h>
+
