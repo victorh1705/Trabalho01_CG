@@ -35,7 +35,11 @@ float up[3];
 int planoZ = 0;
 int planoY = 0;
 
+//Bola
+int raio = 5.0;
+
 void criaPlano();
+int haColisaoPlano();
 
 void idle()
 {
@@ -50,7 +54,7 @@ float t, desiredFrameTime, frameTime;
 
     /// Calculate frame time
     frameTime = t - tLast;
-    // Calculate desired frame time
+    /// Calculate desired frame time
     desiredFrameTime = 1.0 / (float) (desiredFPS);
 
     // Check if the desired frame time was achieved. If not, skip animation.
@@ -61,6 +65,8 @@ float t, desiredFrameTime, frameTime;
     float step = 1; // Speed of the animation
     if(transBolaZ <= -40 || transBolaZ >= 40.0) dir *= -1;
     transBolaZ +=5.0*dir; // Variation computed considering the FPS
+
+    if( haColisaoPlano() == 1) printf("\n ha colisao");
 
     // Update tLast for next time, using static local variable
     tLast = t;
@@ -85,6 +91,15 @@ void criaPlano(){
 
 }
 
+int haColisaoPlano(){
+    if( planoY + 20 > 0 && planoY - 20 < 0){
+        if( transBolaZ - raio <= planoZ){
+            return 1;
+        }
+    }
+    return 0;
+}
+
 void display(void)
 {
     glMatrixMode (GL_PROJECTION);
@@ -94,7 +109,6 @@ void display(void)
               0.0, 0.0, 0.0,
                0.0,  0.0, 1.0);
 
-    float sphereSize = 500.0;
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    glMatrixMode(GL_MODELVIEW);
@@ -103,7 +117,7 @@ void display(void)
     glPushMatrix();
         setMaterial();
         glTranslatef(0.0, 0.0, transBolaZ); /// Posicionamento inicial da esfera
-        glutSolidSphere(5.0, 10.0, 10.0);
+        glutSolidSphere(raio, 10.0, 10.0);
     glPopMatrix();
 
     criaPlano();
