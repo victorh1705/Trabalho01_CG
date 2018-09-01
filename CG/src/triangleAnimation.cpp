@@ -2,9 +2,9 @@
   Name:         triangle_anim.cpp
   Copyright:    Version 0.1
   Author:       Rodrigo Luis de Souza da Silva
-  Last Update:  29/11/2017
+  Last Update:  29/11/2018 (Animation based on FPS)
   Release:      28/10/2004
-  Description:  Animação de triângulo usando função idle. Clicar com mouse para ligar e desligar animação
+  Description:  Animação de triângulo usando função idle.
                 Update: visualização e escolhe do FPS desejado
 */
 
@@ -44,25 +44,16 @@ void idle()
     if( frameTime <= desiredFrameTime)
         return;
 
-    /*
-     *UPDATE ANIMATION VARIABLES
-     */
-    if(var <= -0.001 || var >= 1.0) dir *= -1;
-    var+=dir*0.005;
+    // **  UPDATE ANIMATION VARIABLES ** //
+    float step = 1; // Speed of the animation
+    if(var <= -0.001 || var >= 8.0) dir *= -1;
+    var+=dir* (step / desiredFPS); // Variation computed considering the FPS
 
-    /* Update tLast for next time, using static local variable */
+    // Update tLast for next time, using static local variable
     tLast = t;
 
     glutPostRedisplay();
 
-}
-
-// Mouse callback
-void mouse(int button, int state, int x, int y)
-{
-    if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-    {
-    }
 }
 
 void display(void)
@@ -73,7 +64,7 @@ void display(void)
     glColor3f (1.0, 0.0, 0.0);
     glBegin(GL_POLYGON);
         glVertex2f (0.0, 0.0);
-        glVertex2f (1.0, 0.0);
+        glVertex2f (8.0, 0.0);
         glColor3f (1.0, 1.0, 0.0);
         glVertex2f (0.0, var);
     glEnd();
@@ -91,7 +82,7 @@ void init (void)
     // inicializar sistema de viz.
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0, 1.0, 0.0, 1.0, -1.0, 1.0);
+    glOrtho(0.0, 8.0, 0.0, 8.0, -1.0, 1.0);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -130,7 +121,6 @@ int main(int argc, char** argv)
     glutInitDisplayMode (GLUT_DOUBLE|GLUT_DEPTH|GLUT_RGB);
     glutInitWindowSize (400, 400);
     glutCreateWindow ("");
-    glutMouseFunc( mouse );
     glutKeyboardFunc(keyboard);
     glutIdleFunc( idle);
     init ();

@@ -5,9 +5,6 @@
 #include <string.h>
 #include <assert.h>
 
-//#pragma GCC diagnostic push
-//#pragma GCC diagnostic ignored "-Wunused-result"
-
 glcWavefrontObject::glcWavefrontObject()
 {
     this->model = NULL;
@@ -80,7 +77,7 @@ void glcWavefrontObject::SetShadingMode(int s)
 // Possible values: USE_COLOR, USE_MATERIAL, USE_TEXTURE
 void glcWavefrontObject::SetRenderMode(int s)
 {
-    if(s!=USE_COLOR && s!=USE_MATERIAL && s!=USE_TEXTURE && s!=USE_TEXTURE_AND_MATERIAL)
+    if(s!=USE_COLOR && s!=USE_MATERIAL && s!=USE_TEXTURE)
     {
         printf("glcWavefrontObject::SetRenderMode(...) warning: Invalid render mode requested."
                "Using COLOR\n");
@@ -100,7 +97,7 @@ void  glcWavefrontObject::SetColor(float r, float g, float b, float a)
 }
 
 //-----------------------------------------------------------
-void glcWavefrontObject::ReadObject(const char *filename)
+void glcWavefrontObject::ReadObject(char *filename)
 {
     FILE*   file;
 
@@ -161,42 +158,53 @@ void glcWavefrontObject::ReadObject(const char *filename)
 
     /* close the file */
     fclose(file);
-
-    /* compute the bounding box */
-    ComputeBoundingBox();
 }
 
 //-----------------------------------------------------------
 float glcWavefrontObject::Unitize()
 {
     GLuint  i;
-    GLfloat *maxx, *minx, *maxy, *miny, *maxz, *minz;
+    GLfloat maxx, minx, maxy, miny, maxz, minz;
     GLfloat cx, cy, cz, w, h, d;
     GLfloat scale;
 
     assert(model);
     assert(model->vertices);
 
-    /* recover bounding box from model */
-	minx = &model->boundingbox[0];
-	miny = &model->boundingbox[1];
-	minz = &model->boundingbox[2];
-	maxx = &model->boundingbox[3];
-	maxy = &model->boundingbox[4];
-	maxz = &model->boundingbox[5];
+    /* get the max/mins */
+    maxx = minx = model->vertices[3 + 0];
+    maxy = miny = model->vertices[3 + 1];
+    maxz = minz = model->vertices[3 + 2];
+    for (i = 1; i <= model->numvertices; i++)
+    {
+        if (maxx < model->vertices[3 * i + 0])
+            maxx = model->vertices[3 * i + 0];
+        if (minx > model->vertices[3 * i + 0])
+            minx = model->vertices[3 * i + 0];
+
+        if (maxy < model->vertices[3 * i + 1])
+            maxy = model->vertices[3 * i + 1];
+        if (miny > model->vertices[3 * i + 1])
+            miny = model->vertices[3 * i + 1];
+
+        if (maxz < model->vertices[3 * i + 2])
+            maxz = model->vertices[3 * i + 2];
+        if (minz > model->vertices[3 * i + 2])
+            minz = model->vertices[3 * i + 2];
+    }
 
     /* calculate model width, height, and depth */
-    w = Abs(*maxx - *minx);
-    h = Abs(*maxy - *miny);
-    d = Abs(*maxz - *minz);
+    w = Abs(maxx) + Abs(minx);
+    h = Abs(maxy) + Abs(miny);
+    d = Abs(maxz) + Abs(minz);
 
     /* calculate center of the model */
-    cx = (*maxx + *minx) / 2.0;
-    cy = (*maxy + *miny) / 2.0;
-    cz = (*maxz + *minz) / 2.0;
+    cx = (maxx + minx) / 2.0;
+    cy = (maxy + miny) / 2.0;
+    cz = (maxz + minz) / 2.0;
 
     /* calculate unitizing scale factor */
-    scale = 1.0 / Max(Max(w, h), d);
+    scale = 2.0 / Max(Max(w, h), d);
 
     /* translate around center then scale */
     for (i = 1; i <= model->numvertices; i++)
@@ -208,88 +216,7 @@ float glcWavefrontObject::Unitize()
         model->vertices[3 * i + 1] *= scale;
         model->vertices[3 * i + 2] *= scale;
     }
-
-    /* correct bounding box */
-    (*minx) = scale * (*minx-cx);
-    (*miny) = scale * (*miny-cy);
-    (*minz) = scale * (*minz-cz);
-    (*maxx) = scale * (*maxx-cx);
-    (*maxy) = scale * (*maxy-cy);
-    (*maxz) = scale * (*maxz-cz);
-
     return scale;
-}
-
-//-----------------------------------------------------------
-void glcWavefrontObject::GetDimensions(GLfloat* dimensions)
-{
-	GLfloat maxx, minx, maxy, miny, maxz, minz;
-
-	assert(model);
-	assert(model->vertices);
-	assert(dimensions);
-
-	/* recover bounding box from model */
-	minx = model->boundingbox[0]; maxx = model->boundingbox[3];
-	miny = model->boundingbox[1]; maxy = model->boundingbox[4];
-	minz = model->boundingbox[2]; maxz = model->boundingbox[5];
-
-    /* calculate model width, height, and depth */
-    dimensions[0] = Abs(maxx - minx);
-    dimensions[1] = Abs(maxy - miny);
-    dimensions[2] = Abs(maxz - minz);
-}
-
-//-----------------------------------------------------------
-void glcWavefrontObject::Scale(GLfloat scale)
-{
-    GLuint i;
-
-    for (i = 1; i <= model->numvertices; i++)
-    {
-        model->vertices[3 * i + 0] *= scale;
-        model->vertices[3 * i + 1] *= scale;
-        model->vertices[3 * i + 2] *= scale;
-    }
-
-    for(i = 0; i < 6; i++)
-        model->boundingbox[i] *= scale;
-}
-
-//-----------------------------------------------------------
-void glcWavefrontObject::ComputeBoundingBox()
-{
-    GLuint i;
-	GLfloat maxx, minx, maxy, miny, maxz, minz;
-
-	assert(model);
-	assert(model->vertices);
-
-	/* get the max/mins */
-	maxx = minx = model->vertices[3 + 0];
-	maxy = miny = model->vertices[3 + 1];
-	maxz = minz = model->vertices[3 + 2];
-	for (i = 1; i <= model->numvertices; i++)
-	{
-		if (maxx < model->vertices[3 * i + 0])
-			maxx = model->vertices[3 * i + 0];
-		if (minx > model->vertices[3 * i + 0])
-			minx = model->vertices[3 * i + 0];
-
-		if (maxy < model->vertices[3 * i + 1])
-			maxy = model->vertices[3 * i + 1];
-		if (miny > model->vertices[3 * i + 1])
-			miny = model->vertices[3 * i + 1];
-
-		if (maxz < model->vertices[3 * i + 2])
-			maxz = model->vertices[3 * i + 2];
-		if (minz > model->vertices[3 * i + 2])
-			minz = model->vertices[3 * i + 2];
-	}
-
-	model->boundingbox[0] = minx; model->boundingbox[3] = maxx;
-	model->boundingbox[1] = miny; model->boundingbox[4] = maxy;
-	model->boundingbox[2] = minz; model->boundingbox[5] = maxz;
 }
 
 //-----------------------------------------------------------
@@ -499,6 +426,19 @@ void glcWavefrontObject::VertexNormals(GLfloat angle)
 }
 
 //-----------------------------------------------------------
+void glcWavefrontObject::Scale(GLfloat scale)
+{
+    GLuint i;
+
+    for (i = 1; i <= model->numvertices; i++)
+    {
+        model->vertices[3 * i + 0] *= scale;
+        model->vertices[3 * i + 1] *= scale;
+        model->vertices[3 * i + 2] *= scale;
+    }
+}
+
+//-----------------------------------------------------------
 void glcWavefrontObject::Normalize(GLfloat* v)
 {
     GLfloat l;
@@ -549,54 +489,9 @@ float glcWavefrontObject::Abs(GLfloat f)
 }
 
 //-----------------------------------------------------------
-void glcWavefrontObject::DrawBoundingBox()
-{
-    float pmin[3] = {model->boundingbox[0], model->boundingbox[1], model->boundingbox[2]};
-    float pmax[3] = {model->boundingbox[3], model->boundingbox[4], model->boundingbox[5]};
-
-    bool lightWasEnabled   = glIsEnabled(GL_LIGHTING);
-    bool textureWasEnabled = glIsEnabled(GL_TEXTURE_2D);
-
-    if(lightWasEnabled)   glDisable(GL_LIGHTING);   // Disabling Lighting
-    if(textureWasEnabled) glDisable(GL_TEXTURE_2D); // Disabling texture
-
-    // Draw Bounding Box
-    glColor3f(0.8, 0.8, 0.8);
-    glBegin(GL_LINE_STRIP);
-        glVertex3f(pmin[0],pmin[1],pmin[2]);
-        glVertex3f(pmax[0],pmin[1],pmin[2]);
-        glVertex3f(pmax[0],pmin[1],pmax[2]);
-        glVertex3f(pmin[0],pmin[1],pmax[2]); // Base
-
-        glVertex3f(pmin[0],pmin[1],pmin[2]);
-        glVertex3f(pmin[0],pmax[1],pmin[2]);
-        glVertex3f(pmin[0],pmax[1],pmax[2]);
-        glVertex3f(pmin[0],pmin[1],pmax[2]); // Left
-
-        glVertex3f(pmax[0],pmin[1],pmax[2]);
-        glVertex3f(pmax[0],pmax[1],pmax[2]);
-        glVertex3f(pmin[0],pmax[1],pmax[2]); // Back
-    glEnd();
-
-    glBegin(GL_LINE_STRIP);
-        glVertex3f(pmin[0],pmax[1],pmin[2]);
-        glVertex3f(pmax[0],pmax[1],pmin[2]);
-        glVertex3f(pmax[0],pmax[1],pmax[2]); // Top
-    glEnd();
-
-    glBegin(GL_LINES);
-        glVertex3f(pmax[0],pmin[1],pmin[2]);
-        glVertex3f(pmax[0],pmax[1],pmin[2]); // Last edge to close front and right
-    glEnd();
-
-    if(lightWasEnabled)   glEnable(GL_LIGHTING);   // Enable Lighting, if applicable
-    if(textureWasEnabled) glEnable(GL_TEXTURE_2D); // Disabling texture
-}
-
-//-----------------------------------------------------------
 void glcWavefrontObject::Draw()
 {
-    static GLuint i,j;
+    static GLuint i;
     static GLMgroup* group;
     static GLMtriangle* triangle;
     static GLMmaterial* material;
@@ -614,7 +509,7 @@ void glcWavefrontObject::Draw()
         printf("glcWavefrontObject::Draw() warning: smooth shading mode requested with no normals defined. Changing to FLAT_SHADING!\n");
         this->shading = FLAT_SHADING;
     }
-    if ( (this->render == USE_TEXTURE || this->render == USE_TEXTURE_AND_MATERIAL) && !model->texcoords)
+    if (this->shading == USE_TEXTURE && !model->texcoords)
     {
         printf("glcWavefrontObject::Draw() warning: texture render mode requested with no texture coordinates defined.\nChanging to Color Rendering.\n");
         this->render = USE_COLOR;
@@ -630,19 +525,20 @@ void glcWavefrontObject::Draw()
     else if (this->render == USE_MATERIAL)
         glDisable(GL_COLOR_MATERIAL);
 
+    /* perhaps this loop should be unrolled into material, color, flat, smooth, etc. loops?
+       Since most cpu's have good branch prediction schemes (and these branches will always
+       go one way), probably wouldn't gain too much?  */
+
     group = model->groups;
     while (group)
     {
-        if (this->render == USE_MATERIAL || this->render == USE_TEXTURE_AND_MATERIAL)
+        if (this->render == USE_MATERIAL)
         {
-            if(model->materials) // check if USE_TEXTURE_AND_MATERIAL is selected (some models may have only texture)
-            {
-                material = &model->materials[group->material];
-                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material->ambient);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material->diffuse);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material->specular);
-                glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material->shininess);
-            }
+            material = &model->materials[group->material];
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, material->ambient);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, material->diffuse);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, material->specular);
+            glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material->shininess);
         }
 
         if (this->render == USE_COLOR)
@@ -655,19 +551,30 @@ void glcWavefrontObject::Draw()
         {
             triangle = &T(group->triangles[i]);
 
-            for (j = 0; j < 3; j++)
-            {
-                //if (mode & FLAT_SHADING)
-                if(this->shading == FLAT_SHADING)
-                    glNormal3fv(&model->facetnorms[3 * triangle->findex]);
+            //if (mode & FLAT_SHADING)
+            if(this->shading == FLAT_SHADING)
+                glNormal3fv(&model->facetnorms[3 * triangle->findex]);
 
-                //if (mode & SMOOTH_SHADING)
-                if(this->shading == SMOOTH_SHADING)
-                    glNormal3fv(&model->normals[3 * triangle->nindices[j]]);
-                if (this->render == USE_TEXTURE || this->render == USE_TEXTURE_AND_MATERIAL )
-                    glTexCoord2fv(&model->texcoords[2 * triangle->tindices[j]]);
-                glVertex3fv(&model->vertices[3 * triangle->vindices[j]]);
-            }
+            //if (mode & SMOOTH_SHADING)
+            if(this->shading == SMOOTH_SHADING)
+                glNormal3fv(&model->normals[3 * triangle->nindices[0]]);
+            if (this->render ==USE_TEXTURE)
+                glTexCoord2fv(&model->texcoords[2 * triangle->tindices[0]]);
+            glVertex3fv(&model->vertices[3 * triangle->vindices[0]]);
+
+            //if (mode & SMOOTH_SHADING)
+            if(this->shading == SMOOTH_SHADING)
+                glNormal3fv(&model->normals[3 * triangle->nindices[1]]);
+            if (this->render == USE_TEXTURE)
+                glTexCoord2fv(&model->texcoords[2 * triangle->tindices[1]]);
+            glVertex3fv(&model->vertices[3 * triangle->vindices[1]]);
+
+            //if (mode & SMOOTH_SHADING)
+            if(this->shading == SMOOTH_SHADING)
+                glNormal3fv(&model->normals[3 * triangle->nindices[2]]);
+            if (this->render == USE_TEXTURE)
+                glTexCoord2fv(&model->texcoords[2 * triangle->tindices[2]]);
+            glVertex3fv(&model->vertices[3 * triangle->vindices[2]]);
         }
         glEnd();
 
@@ -1225,5 +1132,3 @@ GLMgroup* glcWavefrontObject::FindGroup(char* name)
 
     return group;
 }
-
-#pragma GCC diagnostic pop

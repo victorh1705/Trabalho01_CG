@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1535584757 source:c:\users\thali\documents\cg\src\camerarotation.cpp
+	<GL/glut.h>
+	<stdlib.h>
+	<stdio.h>
+	<math.h>
+	<ctype.h>
+
+1368290960 c:\users\thali\documents\cg\shared\windows\include\gl\glut.h
+	"freeglut_std.h"
+
+1368290960 c:\users\thali\documents\cg\shared\windows\include\gl\freeglut_std.h
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
+

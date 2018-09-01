@@ -21,12 +21,12 @@ seus pacotes equivalentes) devem estar instalados:
 * libalut-dev
 * libpng16-dev
 * libjpeg-dev
-* libglm-dev    (NOVO)
-* libglfw3      (NOVO)
-* libglfw3-dev  (NOVO)
-* libglfw3-doc  (NOVO)
-* libsoil-dev   (NOVO)
-* libassimp-dev (NOVO)
+* libglm-dev    
+* libglfw3      
+* libglfw3-dev  
+* libglfw3-doc  
+* libsoil-dev   
+* libassimp-dev 
 
 
 Essas instruções foram testadas no Linux Mint 18.2 64 bits.

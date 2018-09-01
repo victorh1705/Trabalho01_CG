@@ -22,6 +22,7 @@ class point3D
 		// Constructor/Destructor
 		point3D(double x, double y, double z) {u = x; v = y; w = z;};
 		point3D(point3D *p) {u = p->x(); v = p->y(); w = p->z();};
+		point3D() {};
 		~point3D() {};
 
 		// Methods

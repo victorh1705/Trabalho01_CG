@@ -1,8 +1,7 @@
 /*
-  Name:         glcWavefrontObject.h
+  Name:         glcShader.h
   Author:       Rodrigo Luis de Souza da Silva
   Date:         06/12/2017
-                View glcWavefrontObject_Updates.txt to see the updates of this class.
   Description:  GL class to help dealing with wavefront objects. It's a simplified version
                 of the well-known glm file reader developed by Nate Robins.
 */
@@ -12,7 +11,7 @@
 
 #include <math.h>
 #include <stdio.h>
-#include <GL/gl.h>
+#include <GL/glut.h>
 
 using namespace std;
 
@@ -21,10 +20,9 @@ using namespace std;
 #define FLAT_SHADING    0       /* render with facet normals */
 #define SMOOTH_SHADING  1       /* render with vertex normals */
 
-#define USE_COLOR                 0       /* render with colors */
-#define USE_MATERIAL              1       /* render with materials */
-#define USE_TEXTURE               2       /* render with texture coords */
-#define USE_TEXTURE_AND_MATERIAL  3       /* render with texture coords and material (if available) */
+#define USE_COLOR       0       /* render with colors */
+#define USE_MATERIAL    1       /* render with materials */
+#define USE_TEXTURE     2       /* render with texture coords */
 
 typedef struct _GLMaterial  GLMmaterial;
 typedef struct _GLMtriangle GLMtriangle;
@@ -44,12 +42,9 @@ class glcWavefrontObject
         void  SetRenderMode(int);   // Possible values: USE_COLOR, USE_MATERIAL, USE_TEXTURE
         void  SetColor(float, float, float, float a = 1.0);
         void Draw();
-        void DrawBoundingBox();
-        void ReadObject(const char *filename);
+        void ReadObject(char *filename);
         int GetNumberOfVertices();
         int GetNumberOfTriangles();
-
-        void GetDimensions(GLfloat* dimensions);
 
         float Unitize();
         void FacetNormal();
@@ -71,7 +66,6 @@ class glcWavefrontObject
         char* DirName(char* path);
         void  ReadMTL(char* name);
         void  Normalize(GLfloat* v);
-        void  ComputeBoundingBox();
 
         // Attributes
         int shading;    // shading mode
@@ -141,7 +135,6 @@ struct _GLMmodel
     GLMgroup*    groups;          /* linked list of groups */
 
     GLfloat position[3];          /* position of the model */
-    GLfloat boundingbox[6];       /* [minx, miny, minz, maxx, maxy, maxz] */
 };
 
 struct _GLMnode

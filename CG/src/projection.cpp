@@ -102,20 +102,20 @@ void mouse(int button, int state, int x, int y)
 
 void display(void)
 {
-   // Limpar todos os pixels
+   /// Limpar todos os pixels
    glClear (GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
    float w = width;
    float h = height;
 
-   // inicializar sistema de projeção
+   /// inicializar sistema de projeção
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
 
    int ortho = 10;
    if(!proj)
    {
-      // glOrtho(-orho, orho, -orho, orho, -200, 200);
+      /// glOrtho(-orho, orho, -orho, orho, -200, 200);
       if (width <= height)
 			glOrtho (-ortho, ortho, -ortho*h/w, ortho*h/w, -100.0, 100.0);
 		else
@@ -130,7 +130,7 @@ void display(void)
    gluLookAt (0.0, 0.0, 30.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 
    glPushMatrix();
-		// Rotação dos objetos. Luz esta fixa na posição (0, 0, 5)
+		/// Rotação dos objetos. Luz esta fixa na posição (0, 0, 5)
 		glRotatef( rotationY, 1.0, 0.0, 0.0 );
 		glRotatef( rotationX, 0.0, 1.0, 0.0 );
 
@@ -155,19 +155,19 @@ void display(void)
 
 void init (void)
 {
-   // selecionar cor de fundo (preto)
+   /// selecionar cor de fundo (preto)
    glClearColor (0.0, 0.0, 0.0, 0.0);
 
-   glEnable(GL_LIGHT0);                   // habilita luz 0
-   glEnable(GL_COLOR_MATERIAL);           // Utiliza cor do objeto como material
+   glEnable(GL_LIGHT0);                   /// habilita luz 0
+   glEnable(GL_COLOR_MATERIAL);           /// Utiliza cor do objeto como material
    glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
 	GLfloat light0_position[] = {2.0f, 2.0f, 5.0f, 0.0f};
    glLightfv(GL_LIGHT0, GL_POSITION, light0_position);
 
-   glEnable(GL_LIGHTING);                 // Habilita luz
-   glEnable(GL_DEPTH_TEST);               // Habilita Z-buffer
-   glEnable(GL_CULL_FACE);                // Habilita Backface-Culling
+   glEnable(GL_LIGHTING);                 /// Habilita luz
+   glEnable(GL_DEPTH_TEST);               /// Habilita Z-buffer
+   glEnable(GL_CULL_FACE);                /// Habilita Backface-Culling
 }
 
 

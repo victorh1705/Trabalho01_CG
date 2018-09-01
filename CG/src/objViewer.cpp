@@ -3,7 +3,7 @@
 
   Author:       Rodrigo Luis de Souza da Silva
   Date:         22/12/2005
-  Last Update:  06/12/2017
+  Last Update:  22/08/2018
   Description:  View OBJ files based on the glcWarefrontObject class.
 */
 
@@ -38,28 +38,35 @@ typedef struct
 object *objectList;
 
 glcWavefrontObject *objectManager = NULL;
+bool fullScreen = false;
 
 int selected = 0;
 int selectedShading = SMOOTH_SHADING;
 int selectedRender = USE_MATERIAL;
-float dist = 20.0;
+float dist = 3.0;
 int width = 800;
 int height = 800;
 float rotationX = 0.0, rotationY = 0.0;
 int   last_x, last_y;
+bool drawboundingbox = false;
+bool drawaxes = false;
 
 // Menu
 void showMenu()
 {
     cout << "OBJECT VIEWER" << endl;
-    cout << "-------------\n" << endl;
-    cout << "Mouse\n" << endl;
-    cout << "* Click to move the object and scroll to zoom in/out." << endl;
-    cout << "Keyboard" << endl;
-    cout << "* 1 to " << NUM_OBJECTS << " to change objects" << endl;
-    cout << "* 's' to change shading mode (FLAT_SHADING or SMOOTH_SHADING)" << endl;
-    cout << "* 'r' to change render mode (USE_MATERIAL or USE_COLOR)" << endl;
+    cout << "------------------------\n" << endl;
+    cout << "Mouse" << endl;
+    cout << "* Movimenta o objeto e scroll para zoom." << endl;
+    cout << "Teclado" << endl;
+    cout << "* Setas para direita ou esquerda para mudar objeto." << endl;
+    cout << "* 'b' para desenhar bounding box" << endl;
+    cout << "* 'a' para deixar eixos" << endl;
+    cout << "* 's' para mudar o shading mode (FLAT_SHADING ou SMOOTH_SHADING)" << endl;
+    cout << "* 'r' para mudar o render mode (USE_MATERIAL ou USE_COLOR)" << endl;
+    cout << "* F11 - Habilita/Desabilita modo fullscreen." << endl;
     cout << "* ESC - Para sair" << endl;
+
 }
 
 //Reshape Func
@@ -70,6 +77,25 @@ void reshape( int w, int h)
     glViewport(0,0,w,h);
 }
 
+void specialKeys(int key, int x, int y)
+{
+    switch(key)
+    {
+        case GLUT_KEY_F11:
+            (!fullScreen) ? glutFullScreen() : glutReshapeWindow(800, 600);
+            fullScreen = !fullScreen;
+        break;
+        case GLUT_KEY_RIGHT:
+            selected++;
+            if(selected >= NUM_OBJECTS) selected = 0;
+        break;
+        case GLUT_KEY_LEFT:
+            selected--;
+            if(selected < 0) selected = NUM_OBJECTS-1;
+        break;
+    }
+    glutPostRedisplay();
+}
 
 void keyboard(unsigned char key, int x, int y)
 {
@@ -91,7 +117,12 @@ void keyboard(unsigned char key, int x, int y)
         case 'r':
             selectedRender = (selectedRender == USE_MATERIAL) ? USE_COLOR : USE_MATERIAL;
         break;
-
+        case 'b':
+            drawboundingbox=!drawboundingbox;
+        break;
+        case 'a':
+            drawaxes=!drawaxes;
+        break;
     }
     glutPostRedisplay();
 }
@@ -118,12 +149,32 @@ void mouse(int button, int state, int x, int y)
     }
     if(button == 3) // Scroll up
     {
-        if(dist>=5.0)  dist-=1;
+        if(dist>=1.0)  dist-=0.25;
     }
     if(button==4)   // Scroll down
     {
-        if(dist<=40.0) dist+=1;
+        if(dist<=20.0) dist+=0.25;
     }
+}
+
+void drawAxes()
+{
+    int size = 20.0f;
+
+    glDisable(GL_LIGHTING);
+    glColor3f (0.0, 1.0, 0.0);
+    glBegin(GL_LINES);
+        glColor3f(1.0, 0.0, 0.0);
+        glVertex3f (-size, 0.0, 0.0);
+        glVertex3f ( size, 0.0, 0.0);
+        glColor3f(0.0, 1.0, 0.0);
+        glVertex3f (0.0, -size, 0.0);
+        glVertex3f (0.0,  size, 0.0);
+        glColor3f(0.0, 0.0, 1.0);
+        glVertex3f (0.0, 0.0, -size);
+        glVertex3f (0.0, 0.0,  size);
+    glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 void display(void)
@@ -148,7 +199,10 @@ void display(void)
     objectManager->SelectObject(selected);
     objectManager->SetShadingMode(selectedShading); // Possible values: FLAT_SHADING e SMOOTH_SHADING
     objectManager->SetRenderMode(selectedRender);     // Possible values: USE_COLOR, USE_MATERIAL, USE_TEXTURE (not available in this example)
+    objectManager->Unitize();
     objectManager->Draw();
+    if(drawboundingbox) objectManager->DrawBoundingBox();
+    if(drawaxes)        drawAxes();
 
     glutSwapBuffers ();
     glutPostRedisplay();
@@ -205,6 +259,7 @@ int main(int argc, char** argv)
     glutMotionFunc( motion );
     glutReshapeFunc( reshape );
     glutDisplayFunc(display);
+    glutSpecialFunc( specialKeys );
     glutMainLoop();
 
     return 0;

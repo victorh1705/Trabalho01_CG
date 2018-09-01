@@ -24,8 +24,6 @@ int moveX = 0;
 int moveY = 0;
 bool passiveMotion = false;
 
-
-
 // Special Keys callback
 void specialKeysPress(int key, int x, int y)
 {
@@ -174,6 +172,7 @@ void keyboardPress(unsigned char key, int x, int y)
 			printf("\nUma tecla não mapeada foi pressionada");
 		break;
 	}
+	glutPostRedisplay();
 }
 
 // Keyboard callback
@@ -190,6 +189,7 @@ void keyboardRelease(unsigned char key, int x, int y)
 			moveX = 0;
 		break;
 	}
+	glutPostRedisplay();
 }
 
 void display(void)
