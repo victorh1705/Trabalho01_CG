@@ -38,6 +38,13 @@ int planoY = 0;
 //Bola
 int raio = 5.0;
 
+//Gravidade
+float constGrav = 5.0;
+float velocidade = 0.0;
+float posicaoZ = 0.0;
+float alturaMaxima = 40.0;
+
+
 void criaPlano();
 int haColisaoPlano();
 
@@ -63,11 +70,16 @@ float t, desiredFrameTime, frameTime;
 
     // **  UPDATE ANIMATION VARIABLES ** //
     float step = 1; // Speed of the animation
-    if(transBolaZ <= -40 || transBolaZ >= 40.0) dir *= -1;
+    if(transBolaZ <= -40 + 5){
+        dir *= -1;
+        alturaMaxima = 40;
+    } else if(transBolaZ >= alturaMaxima - 5){
+        dir *= -1;
+    }else if( haColisaoPlano() == 1){
+        dir *= -1;
+        alturaMaxima = planoZ + 80;
+    }
     transBolaZ +=5.0*dir; // Variation computed considering the FPS
-
-    if( haColisaoPlano() == 1) printf("\n ha colisao");
-
     // Update tLast for next time, using static local variable
     tLast = t;
 
@@ -93,7 +105,8 @@ void criaPlano(){
 
 int haColisaoPlano(){
     if( planoY + 20 > 0 && planoY - 20 < 0){
-        if( transBolaZ - raio <= planoZ){
+        if( transBolaZ - raio <= planoZ + 5
+           && transBolaZ - raio >= planoZ - 5){
             return 1;
         }
     }
