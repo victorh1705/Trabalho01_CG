@@ -10,6 +10,7 @@
 #include <GL/glut.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <ctype.h>
 #include "extras.h"
 
@@ -23,14 +24,23 @@ int transBolaZ = 0.0f;
 float rotationX = 0.0, rotationY = 0.0;
 int last_x, last_y;
 
-float eyeX = 150.0;
-float eyeY = 0.0;
-float eyeZ = 80.0;
+float m_yaw, m_pitch;
+bool yawLock = false;
+bool pitchLock = false;
 
+
+float dist = 140.0f;
+float eyeX = 140.0;
+float eyeY = 0.0;
+float eyeZ = 140.0;
 
 float eye[3];
-float foc[3] = {0.0f, 500.0f, 0.0f};
 float up[3];
+
+// Initial Position
+float EyeInitial[3] = {120.0f, 0.0f, 120.0f};
+float foc[3]        = {0.0f, 0.0f, 0.0f};
+float upInitial[3]  = {0.0f, 0.0f, 1.0f};
 
 int planoZ = 0;
 int planoY = 0;
@@ -47,6 +57,36 @@ float alturaMaxima = 40.0;
 
 void criaPlano();
 int haColisaoPlano();
+
+
+void RotatePoint(float *in, float *out, float pitch, float yaw)
+{
+	float xt = in[0], yt = in[1], zt = in[2];
+	float x, y, z;
+
+	// Rotation in 'y' axis
+    x = zt * sin(yaw) + xt * cos(yaw);
+	y = yt;
+	z = zt * cos(yaw) - xt * sin(yaw);
+	// Rotation in 'x' axis
+   out[0] = y * sin(pitch) + x * cos(pitch);
+   out[1] = y * cos(pitch) - x * sin(pitch);
+   out[2] = z;
+
+   //printf("x - %0.6f \n y - %0.6f \n z - %0.6f", &x, &y, &z);
+}
+
+void RotateCamera()
+{
+   float r_pitch = M_PI * m_pitch / 180;
+   float r_yaw   = M_PI * m_yaw / 180;
+
+	// Rotate eye vector
+	RotatePoint(EyeInitial, eye, r_pitch, r_yaw);
+
+	// Rotate up vector
+	RotatePoint(upInitial, up, r_pitch, r_yaw);
+}
 
 void idle()
 {
@@ -118,9 +158,12 @@ void display(void)
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
     gluPerspective(40.0f,(GLfloat)width/(GLfloat)height, 0.1 ,2500);
+
+    RotateCamera();
+
     gluLookAt (eyeX, eyeY, eyeZ,
-              0.0, 0.0, 0.0,
-               0.0,  0.0, 1.0);
+               foc[0], foc[1], foc[2],
+               up[0],  up[1],   up[2]);
 
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -148,11 +191,6 @@ void reshape (int w, int h)
    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 }
 
-void keyboard (unsigned char key, int x, int y)
-{
-   if(tolower(key) == 27) exit(0);
-}
-
 void specialKeyRelease(int key, int x, int y){
     switch(key){
         case GLUT_KEY_RIGHT:
@@ -173,18 +211,57 @@ void specialKeyRelease(int key, int x, int y){
     }
 }
 
-/// Motion callback
-void motion(int x, int y )
+
+
+void fixAngle(float *angle)
 {
-   eyeZ =  ((float)-y + eyeZ);
-   eyeY =  ((float)-x + eyeY);
-
-   printf("\n x : %f.2  e y: %f.2", &x, &y);
-   printf("\n  eyeX - %f.2 eyeY - %f.2 eyeZ - %f.2", &eyeX, &eyeY, &eyeZ);
-
-   glutPostRedisplay();
+	if(*angle > 360) *angle = 1.0f;
+	if(*angle < 0)   *angle = 359.0f;
 }
 
+// Motion callback
+void motion(int x, int y )
+{
+	if(!yawLock) 	rotationX += (float) (x - last_x);
+	if(!pitchLock)	rotationY += (float) (y - last_y);
+
+   last_x = x;
+   last_y = y;
+
+   fixAngle(&rotationX);
+   fixAngle(&rotationY);
+
+	m_yaw   = rotationX;
+   m_pitch = rotationY;
+
+}
+
+// Mouse callback
+void mouse(int button, int state, int x, int y)
+{
+   if ( button == GLUT_LEFT_BUTTON && state == GLUT_DOWN )
+   {
+      last_x = x;
+      last_y = y;
+   }
+}
+
+void keyboard (unsigned char key, int x, int y)
+{
+   switch (tolower(key))
+   {
+      case '+' :
+         dist++;
+         if(dist>140) dist=140;
+         eyeX = eyeZ =dist;
+        break;
+      case '-' :
+         dist--;
+         if(dist<20) dist=20;
+         eyeX = eyeZ =dist;
+        break;
+   }
+}
 
 int main(int argc, char** argv)
 {
