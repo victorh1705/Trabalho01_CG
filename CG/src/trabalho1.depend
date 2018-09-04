@@ -19,3 +19,24 @@
 
 1471984452 c:\users\thali\documents\extras.h
 
+1536027184 source:c:\users\thali\documents\thalita\estudo\8º período\cg\trabalho01\trabalho01_cg\animationbase.cpp
+	<GL/glut.h>
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<ctype.h>
+	"extras.h"
+
+1368290960 c:\users\thali\documents\thalita\estudo\8º período\cg\trabalho01\trabalho01_cg\cg\shared\windows\include\gl\glut.h
+	"freeglut_std.h"
+
+1368290960 c:\users\thali\documents\thalita\estudo\8º período\cg\trabalho01\trabalho01_cg\cg\shared\windows\include\gl\freeglut_std.h
+	<windows.h>
+	<OpenGL/gl.h>
+	<OpenGL/glu.h>
+	<GL/gl.h>
+	<GL/glu.h>
+	<stdlib.h>
+
+1471984452 c:\users\thali\documents\thalita\estudo\8º período\cg\trabalho01\trabalho01_cg\extras.h
+

@@ -64,16 +64,15 @@ void RotatePoint(float *in, float *out, float pitch, float yaw)
 	float xt = in[0], yt = in[1], zt = in[2];
 	float x, y, z;
 
-	// Rotation in 'y' axis
+	/// Rotation in 'y' axis
     x = zt * sin(yaw) + xt * cos(yaw);
 	y = yt;
 	z = zt * cos(yaw) - xt * sin(yaw);
-	// Rotation in 'x' axis
+	/// Rotation in 'x' axis
    out[0] = y * sin(pitch) + x * cos(pitch);
    out[1] = y * cos(pitch) - x * sin(pitch);
    out[2] = z;
 
-   //printf("x - %0.6f \n y - %0.6f \n z - %0.6f", &x, &y, &z);
 }
 
 void RotateCamera()
@@ -250,12 +249,12 @@ void keyboard (unsigned char key, int x, int y)
 {
    switch (tolower(key))
    {
-      case '+' :
+      case '-' :
          dist++;
          if(dist>140) dist=140;
          eyeX = eyeZ =dist;
         break;
-      case '-' :
+      case '+' :
          dist--;
          if(dist<20) dist=20;
          eyeX = eyeZ =dist;
@@ -270,13 +269,14 @@ int main(int argc, char** argv)
    glutInitWindowSize (width, height);
    glutInitWindowPosition (100, 100);
    glutCreateWindow("Animation Base");
-   glutIdleFunc( idle);
    init ();
    glutDisplayFunc(display);
    glutReshapeFunc(reshape);
+   glutMouseFunc( mouse );
    glutMotionFunc( motion );
    glutKeyboardFunc(keyboard);
    glutSpecialUpFunc( specialKeyRelease);
+   glutIdleFunc( idle);
    glutMainLoop();
    return 0;
 }
